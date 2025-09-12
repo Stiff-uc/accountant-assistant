@@ -30,7 +30,7 @@ graph TB
     subgraph "Сервисы данных"
         R[DataService]
         S[LocalStorageService]
-        T[ApiService<br/>(для будущего Spring Boot)]
+        T[ApiService (для будущего Spring Boot)]
     end
     
     subgraph "Модели данных"

@@ -1,12 +1,12 @@
-# Диаграмма архитектуры бухгалтерского приложения
+# Architecture Diagram of the Accounting Application
 
-## Обновлено: 12 сентября 2025
+## Updated: September 12, 2025
 
-## Общая архитектура приложения
+## Overall Application Architecture
 
 ```mermaid
 graph TB
-    subgraph "Пользовательский интерфейс (Vue 3)"
+    subgraph "User Interface (Vue 3)"
         A[Login.vue] --> B[App.vue]
         C[Dashboard.vue] --> B
         D[Transactions.vue] --> B
@@ -14,34 +14,34 @@ graph TB
         F[Counterparties.vue] --> B
         G[ChessReport.vue] --> B
         
-        subgraph "Общие компоненты"
+        subgraph "Common Components"
             H[LoginForm.vue]
             I[Navigation.vue]
         end
     end
     
-    subgraph "Управление состоянием (Pinia)"
+    subgraph "State Management (Pinia)"
         N[authStore]
         O[accountsStore]
         P[transactionsStore]
         Q[counterpartiesStore]
     end
     
-    subgraph "Сервисы данных"
+    subgraph "Data Services"
         R[DataService]
         S[LocalStorageService]
-        T[ApiService (для будущего Spring Boot)]
+        T["ApiService (for future Spring Boot)"]
     end
     
-    subgraph "Модели данных"
+    subgraph "Data Models"
         U[Account]
         V[Transaction]
         W[Counterparty]
     end
     
-    subgraph "Хранилище"
-        X[LocalStorage<br/>(текущее решение)]
-        Y[Spring Boot API<br/>(будущее решение)]
+    subgraph "Storage"
+        X["LocalStorage<br/>(current solution)"]
+        Y["Spring Boot API<br/>(future solution)"]
     end
     
     B --> N
@@ -64,40 +64,40 @@ graph TB
     R --> V
     R --> W
     
-    %% Обновленные связи для компонентов
+    %% Updated connections for components
     B --> H
     B --> I
 ```
 
-## Поток данных при создании проводки
+## Data Flow During Transaction Creation
 
 ```mermaid
 sequenceDiagram
-    participant U as Пользователь
+    participant U as User
     participant C as Transactions.vue
     participant S as transactionsStore
     participant DS as LocalStorageService
     participant AS as accountsStore
     participant CS as counterpartiesStore
     
-    U->>C: Заполняет форму проводки
+    U->>C: Fills out transaction form
     C->>S: createTransaction(transactionData)
     S->>DS: createTransaction(transactionData)
-    DS->>DS: Сохраняет проводку в localStorage
-    DS->>AS: Обновляет остатки по счетам
-    DS->>CS: Обновляет данные контрагента (если указан)
-    DS-->>S: Возвращает созданную проводку
-    S-->>C: Обновляет список проводок
-    C-->>U: Отображает результат
+    DS->>DS: Saves transaction to localStorage
+    DS->>AS: Updates account balances
+    DS->>CS: Updates counterparty data (if specified)
+    DS-->>S: Returns created transaction
+    S-->>C: Updates transaction list
+    C-->>U: Displays result
 ```
 
-## Структура навигации и защиты маршрутов
+## Navigation Structure and Route Protection
 
 ```mermaid
 graph TD
-    A[Начало] --> B{Пользователь авторизован?}
-    B -->|Да| C[Показать навигацию и дашборд]
-    B -->|Нет| D[Перенаправить на страницу входа]
+    A[Start] --> B{Is user authenticated?}
+    B -->|Yes| C[Show navigation and dashboard]
+    B -->|No| D[Redirect to login page]
     
     C --> E[Dashboard.vue]
     C --> F[Transactions.vue]
@@ -106,12 +106,12 @@ graph TD
     C --> I[ChessReport.vue]
     
     D --> J[Login.vue]
-    J --> K{Успешная аутентификация?}
-    K -->|Да| C
-    K -->|Нет| J
+    J --> K{Successful authentication?}
+    K -->|Yes| C
+    K -->|No| J
 ```
 
-## Слой абстракции данных
+## Data Abstraction Layer
 
 ```mermaid
 classDiagram
@@ -183,7 +183,7 @@ classDiagram
     DataService <|-- ApiService
 ```
 
-## Модели данных
+## Data Models
 
 ```mermaid
 classDiagram

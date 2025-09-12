@@ -1,4 +1,5 @@
-# Бухгалтерия на Vue 3
+# Бухгалтерия на Vue 3 / Vue3 Accountant Assistant
+Generated with Kilo Code + Qwen3 Next 80b A3b Instruct
 
 ## English
 

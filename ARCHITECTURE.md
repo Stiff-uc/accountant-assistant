@@ -7,43 +7,39 @@
 
 ```
 src/
-├── assets/                 # Статические ресурсы (изображения, стили)
-├── components/             # Переиспользуемые компоненты
-│   ├── common/             # Общие компоненты
-│   │   ├── LoginForm.vue   # Форма входа
-│   │   ├── Navigation.vue  # Навигационное меню
-│   │   └── DataTable.vue   # Таблица для отображения данных
-│   ├── accounts/           # Компоненты для работы со счетами
-│   ├── transactions/       # Компоненты для работы с проводками
-│   └── counterparties/     # Компоненты для работы с контрагентами
-├── views/                  # Страницы приложения
-│   ├── Login.vue           # Страница входа
-│   ├── Dashboard.vue       # Дашборд с остатками
-│   ├── Transactions.vue    # Страница проводок
-│   ├── Accounts.vue        # Страница счетов
-│   ├── Counterparties.vue  # Страница контрагентов
-│   └── ChessReport.vue     # Шахматная ведомость
-├── stores/                 # Pinia хранилища состояния
-│   ├── authStore.js        # Хранилище аутентификации
-│   ├── accountsStore.js    # Хранилище счетов
-│   ├── transactionsStore.js # Хранилище проводок
-│   └── counterpartiesStore.js # Хранилище контрагентов
-├── services/               # Сервисы для работы с данными
-│   ├── dataService.js      # Абстрактный сервис данных
-│   ├── localStorageService.js # Реализация для localStorage
-│   └── apiService.js       # Заготовка для Spring Boot API
-├── models/                 # Модели данных
-│   ├── Account.js          # Модель счета
-│   ├── Transaction.js      # Модель проводки
-│   └── Counterparty.js     # Модель контрагента
-├── utils/                  # Утилиты
-│   ├── validation.js       # Функции валидации
-│   ├── formatters.js       # Форматирование данных
-│   └── constants.js        # Константы приложения
-├── router/                 # Настройки маршрутизации
-│   └── index.js            # Конфигурация Vue Router
-├── App.vue                 # Корневой компонент
-└── main.js                 # Точка входа
+├── assets/                 # Static resources (images, styles)
+├── components/             # Reusable components
+│   ├── common/             # Common components
+│   │   ├── LoginForm.vue   # Login form
+│   │   └── Navigation.vue  # Navigation menu
+├── views/                  # Application pages
+│   ├── Login.vue           # Login page
+│   ├── Dashboard.vue       # Dashboard with balances
+│   ├── Transactions.vue    # Transactions page
+│   ├── Accounts.vue        # Accounts page
+│   ├── Counterparties.vue  # Counterparties page
+│   └── ChessReport.vue     # Chess report
+├── stores/                 # Pinia state stores
+│   ├── authStore.js        # Authentication store
+│   ├── accountsStore.js    # Accounts store
+│   ├── transactionsStore.js # Transactions store
+│   └── counterpartiesStore.js # Counterparties store
+├── services/               # Data services
+│   ├── dataService.js      # Abstract data service
+│   ├── localStorageService.js # localStorage implementation
+│   └── apiService.js       # Spring Boot API stub
+├── models/                 # Data models
+│   ├── Account.js          # Account model
+│   ├── Transaction.js      # Transaction model
+│   └── Counterparty.js     # Counterparty model
+├── utils/                  # Utilities
+│   ├── validation.js       # Validation functions
+│   ├── formatters.js       # Data formatting
+│   └── constants.js        # Application constants
+├── router/                 # Routing configuration
+│   └── index.js            # Vue Router configuration
+├── App.vue                 # Root component
+└── main.js                 # Entry point
 ```
 
 ## Модели данных
@@ -51,141 +47,144 @@ src/
 ### Account (Счет)
 ```javascript
 {
-  id: string,               // Уникальный идентификатор
-  code: string,             // Код счета (например, "10", "20", "41", "51")
-  name: string,             // Наименование счета
-  type: string,             // Тип: "asset", "liability", "income", "expense"
-  isActive: boolean,        // Активность счета
-  balance: number           // Текущий остаток
+  id: string,               // Unique identifier
+  code: string,             // Account code (e.g., "10", "20", "41", "51")
+  name: string,             // Account name
+  type: string,             // Type: "asset", "liability", "income", "expense"
+  isActive: boolean,        // Account active status
+  balance: number,          // Current balance
+  isFavorite: boolean,      // Favorite account
+  createdAt: Date,          // Creation date
+  updatedAt: Date           // Update date
 }
 ```
 
 ### Transaction (Проводка)
 ```javascript
 {
-  id: string,               // Уникальный идентификатор
-  date: Date,               // Дата проводки
-  description: string,      // Описание проводки
-  debitAccountId: string,   // ID счета дебета
-  creditAccountId: string,  // ID счета кредита
-  amount: number,           // Сумма
-  counterpartyId: string,   // ID контрагента (опционально)
-  createdAt: Date,          // Дата создания
-  updatedAt: Date           // Дата обновления
+  id: string,               // Unique identifier
+  date: Date,               // Transaction date
+  description: string,      // Transaction description
+  debitAccountId: string,   // Debit account ID
+  creditAccountId: string,  // Credit account ID
+  amount: number,           // Amount
+  counterpartyId: string,   // Counterparty ID (optional)
+  createdAt: Date,          // Creation date
+  updatedAt: Date           // Update date
 }
 ```
 
 ### Counterparty (Контрагент)
 ```javascript
 {
-  id: string,               // Уникальный идентификатор
-  name: string,             // Наименование контрагента
-  inn: string,              // ИНН (опционально)
-  address: string,          // Адрес (опционально)
-  phone: string,            // Телефон (опционально)
-  email: string,            // Email (опционально)
-  createdAt: Date,          // Дата создания
-  updatedAt: Date           // Дата обновления
+  id: string,               // Unique identifier
+  name: string,             // Counterparty name
+  inn: string,              // INN (optional)
+  address: string,          // Address (optional)
+  phone: string,            // Phone (optional)
+  email: string,            // Email (optional)
+  createdAt: Date,          // Creation date
+  updatedAt: Date           // Update date
 }
 ```
 
 ## Слой абстракции данных
 
-### DataService (Абстрактный класс)
+### DataService (Abstract class)
 ```javascript
 class DataService {
-  // Методы для работы со счетами
+  // Account methods
   async getAccounts() {}
   async getAccountById(id) {}
   async createAccount(account) {}
   async updateAccount(id, account) {}
   async deleteAccount(id) {}
-  
-  // Методы для работы с проводками
+    
+  // Transaction methods
   async getTransactions(filters = {}) {}
   async getTransactionById(id) {}
   async createTransaction(transaction) {}
   async updateTransaction(id, transaction) {}
   async deleteTransaction(id) {}
-  
-  // Методы для работы с контрагентами
+    
+  // Counterparty methods
   async getCounterparties() {}
   async getCounterpartyById(id) {}
   async createCounterparty(counterparty) {}
   async updateCounterparty(id, counterparty) {}
   async deleteCounterparty(id) {}
-  
-  // Методы для аутентификации
+    
+  // Authentication methods
   async login(username, password) {}
   async logout() {}
   async getCurrentUser() {}
 }
 ```
 
-### LocalStorageService (Реализация для localStorage)
-Реализация всех методов DataService с использованием localStorage для хранения данных.
+### LocalStorageService (localStorage implementation)
+Implementation of all DataService methods using localStorage for data storage.
 
-### ApiService (Заготовка для Spring Boot)
-Заготовка методов для будущего взаимодействия с Spring Boot API.
+### ApiService (Spring Boot stub)
+Stub methods for future interaction with Spring Boot API.
 
-## Хранилища состояния (Pinia)
+## State Stores (Pinia)
 
 ### authStore
-Управление состоянием аутентификации:
-- Текущий пользователь
-- Статус входа
-- Токен (в будущем)
+Authentication state management:
+- Current user
+- Login status
+- Token (in future)
 
 ### accountsStore
-Управление счетами:
-- Список счетов
-- Текущий выбранный счет
-- Методы для CRUD операций
+Accounts management:
+- List of accounts
+- Currently selected account
+- CRUD operations
 
 ### transactionsStore
-Управление проводками:
-- Список проводок
-- Фильтры
-- Методы для CRUD операций
+Transactions management:
+- List of transactions
+- Filters
+- CRUD operations
 
 ### counterpartiesStore
-Управление контрагентами:
-- Список контрагентов
-- Текущий выбранный контрагент
-- Методы для CRUD операций
+Counterparties management:
+- List of counterparties
+- Currently selected counterparty
+- CRUD operations
 
-## Маршрутизация
+## Routing
 
-- `/login` - Страница входа
-- `/dashboard` - Дашборд с остатками по счетам
-- `/transactions` - Страница проводок
-- `/accounts` - Страница счетов
-- `/counterparties` - Страница контрагентов
-- `/chess-report` - Шахматная ведомость
+- `/login` - Login page
+- `/dashboard` - Dashboard with account balances
+- `/transactions` - Transactions page
+- `/accounts` - Accounts page
+- `/counterparties` - Counterparties page
+- `/chess-report` - Chess report
 
-## Предустановленный план счетов
+## Predefined Chart of Accounts
 
-### Активы
-- 10 "Касса"
-- 41 "Расчетный счет"
-- 43 "Товары на складе"
+### Assets
+- 10 "Cash"
+- 41 "Bank account"
+- 43 "Inventory"
 
-### Пассивы
-- 60 "Расчеты с поставщиками"
-- 70 "Расчеты с персоналом"
+### Liabilities
+- 60 "Accounts payable"
+- 70 "Payroll"
 
-### Доходы
-- 90 "Продажи"
+### Income
+- 90 "Sales"
 
-### Расходы
-- 20 "Закупки"
-- 44 "Прочие расходы"
+### Expenses
+- 20 "Purchases"
+- 44 "Other expenses"
 
-## Безопасность
+## Security
 
-- Простая аутентификация с предустановленными данными (admin:admin)
-- Защита маршрутов с использованием навигационных охранников Vue Router
-- Хранение данных в localStorage (в будущем будет заменено на серверное хранилище)
+- Simple authentication with predefined credentials (admin:admin)
+- Route protection using Vue Router navigation guards
+- Data stored in localStorage (will be replaced with server storage in future)
 
 ## Адаптивность
 

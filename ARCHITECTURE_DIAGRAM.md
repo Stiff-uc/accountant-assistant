@@ -1,5 +1,7 @@
 # Диаграмма архитектуры бухгалтерского приложения
 
+## Обновлено: 12 сентября 2025
+
 ## Общая архитектура приложения
 
 ```mermaid
@@ -15,13 +17,6 @@ graph TB
         subgraph "Общие компоненты"
             H[LoginForm.vue]
             I[Navigation.vue]
-            J[DataTable.vue]
-        end
-        
-        subgraph "Специализированные компоненты"
-            K[AccountComponents]
-            L[TransactionComponents]
-            M[CounterpartyComponents]
         end
     end
     
@@ -68,6 +63,10 @@ graph TB
     R --> U
     R --> V
     R --> W
+    
+    %% Обновленные связи для компонентов
+    B --> H
+    B --> I
 ```
 
 ## Поток данных при создании проводки
@@ -75,20 +74,18 @@ graph TB
 ```mermaid
 sequenceDiagram
     participant U as Пользователь
-    participant C as TransactionForm.vue
+    participant C as Transactions.vue
     participant S as transactionsStore
-    participant DS as DataService
-    participant LS as LocalStorageService
+    participant DS as LocalStorageService
     participant AS as accountsStore
     participant CS as counterpartiesStore
     
     U->>C: Заполняет форму проводки
     C->>S: createTransaction(transactionData)
     S->>DS: createTransaction(transactionData)
-    DS->>LS: Сохраняет проводку
+    DS->>DS: Сохраняет проводку в localStorage
     DS->>AS: Обновляет остатки по счетам
     DS->>CS: Обновляет данные контрагента (если указан)
-    LS-->>DS: Возвращает созданную проводку
     DS-->>S: Возвращает созданную проводку
     S-->>C: Обновляет список проводок
     C-->>U: Отображает результат
@@ -197,6 +194,9 @@ classDiagram
         +String type
         +Boolean isActive
         +Number balance
+        +Boolean isFavorite
+        +Date createdAt
+        +Date updatedAt
     }
     
     class Transaction {

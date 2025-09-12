@@ -72,3 +72,57 @@ The application is ready to use. All data is stored in the browser's localStorag
    - Пароль: admin
 
 Приложение готово к использованию. Все данные сохраняются в localStorage браузера.
+
+## Сборка APK для Android
+
+### English
+
+To build an APK file for installation on an Android device:
+
+1. Make sure you have the Android SDK installed and configured in `android/local.properties` (path: `sdk.dir=D:/App/Android/SDK`).
+2. Build the web version of the application:
+   ```bash
+   npm run build
+   ```
+3. Add the Android platform (if not already added):
+   ```bash
+   npx cap add android
+   ```
+4. Copy the built web assets into the Android project:
+   ```bash
+   npx cap copy
+   ```
+5. Build the debug APK:
+   ```bash
+   cd android && ./gradlew assembleDebug
+   ```
+6. The APK file will be generated at:  
+   `android/app/build/outputs/apk/debug/app-debug.apk`
+
+Copy this file to your device and install it manually (enable "Install from unknown sources").
+
+### Русский
+
+Чтобы собрать APK-файл для установки на Android-устройство:
+
+1. Убедитесь, что у вас установлен Android SDK и он настроен в файле `android/local.properties` (путь: `sdk.dir=D:/App/Android/SDK`).
+2. Соберите веб-версию приложения:
+   ```bash
+   npm run build
+   ```
+3. Добавьте платформу Android (если ещё не добавлена):
+   ```bash
+   npx cap add android
+   ```
+4. Скопируйте собранный код в Android-проект:
+   ```bash
+   npx cap copy
+   ```
+5. Соберите отладочный APK:
+   ```bash
+   cd android && ./gradlew assembleDebug
+   ```
+6. APK-файл будет сгенерирован по пути:  
+   `android/app/build/outputs/apk/debug/app-debug.apk`
+
+Скопируйте этот файл на устройство и установите вручную (включив "Установка из неизвестных источников").

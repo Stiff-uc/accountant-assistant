@@ -1,0 +1,8 @@
+{
+  "appId": "com.buhvue.app",
+  "appName": "VueAccountant",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -23,8 +23,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="account in accountsStore.accounts" 
+          <tr
+            v-for="account in accountsStore.accounts.sort((a, b) => a.code.localeCompare(b.code))"
             :key="account.id"
             :class="{ 'inactive-account': !account.isActive }"
           >
@@ -302,148 +302,19 @@ export default {
       await this.accountsStore.loadAccounts()
 
       alert('Балансы успешно пересчитаны по проводкам')
-    }
-  },
-  
-  methods: {
-    formatCurrency(amount) {
-      return new Intl.NumberFormat('ru-RU', {
-        style: 'currency',
-        currency: 'RUB'
-      }).format(amount)
-    },
-    
-    accountTypeLabel(type) {
-      const labels = {
-        asset: 'Актив',
-        liability: 'Обязательство',
-        income: 'Доход',
-        expense: 'Расход'
-      }
-      return labels[type] || type
-    },
-    
-    openAccountForm() {
-      this.editingAccount = null
-      this.form = {
-        code: '',
-        name: '',
-        type: '',
-        balance: 0,
-        isActive: true
-      }
-      this.showForm = true
-    },
-    
-    editAccount(account) {
-      this.editingAccount = account
-      this.form = {
-        code: account.code,
-        name: account.name,
-        type: account.type,
-        balance: account.balance,
-        isActive: account.isActive
-      }
-      this.showForm = true
-    },
-    
-    async saveAccount() {
-      // Валидация
-      const account = {
-        id: this.editingAccount?.id || '',
-        code: this.form.code,
-        name: this.form.name,
-        type: this.form.type,
-        balance: this.form.balance,
-        isActive: this.form.isActive
-      }
-      
-      const accountModel = new Account(account)
-      const { isValid, errors } = accountModel.validate()
-      if (!isValid) {
-        alert('Пожалуйста, исправьте ошибки в форме')
-        return
-      }
-      
-      try {
-        if (this.editingAccount) {
-          await this.accountsStore.updateAccount(this.editingAccount.id, account)
-        } else {
-          await this.accountsStore.createAccount(account)
-        }
-        
-        this.showForm = false
-        this.editingAccount = null
-      } catch (error) {
-        alert('Не удалось сохранить счёт')
-      }
-    },
-    
-    async deleteAccount(account) {
-      if (!confirm('Вы уверены, что хотите удалить этот счёт?')) return
-      
-      try {
-        await this.accountsStore.deleteAccount(account.id)
-      } catch (error) {
-        alert('Не удалось удалить счёт')
-      }
-    },
-    
-    cancelForm() {
-      this.showForm = false
-      this.editingAccount = null
     },
 
-    async toggleFavorite(account) {
-      const updatedAccount = {
-        ...account,
-        isFavorite: !account.isFavorite
+    sortAccounts(key) {
+      if (this.sortKey === key) {
+        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
+      } else {
+        this.sortKey = key
+        this.sortOrder = 'asc'
       }
-      await this.accountsStore.updateAccount(account.id, updatedAccount)
-    },
-
-    async recalculateBalances() {
-      console.log('this.transactionsStore:', this.transactionsStore)
-      const accounts = this.accountsStore.accounts
-      const transactionsStore = useTransactionsStore()
-      const transactions = transactionsStore.transactions
-
-      // Создаём карту балансов по ID
-      const balanceMap = {}
-
-      // Инициализируем все счета нулём
-      accounts.forEach(account => {
-        balanceMap[account.id] = 0
-      })
-
-      // Проходим по всем проводкам
-      transactions.forEach(transaction => {
-        // Дебет — уменьшает баланс
-        if (balanceMap[transaction.debitAccountId] !== undefined) {
-          balanceMap[transaction.debitAccountId] -= transaction.amount
-        }
-        // Кредит — увеличивает баланс
-        if (balanceMap[transaction.creditAccountId] !== undefined) {
-          balanceMap[transaction.creditAccountId] += transaction.amount
-        }
-      })
-
-      // Обновляем каждый счёт
-      for (const account of accounts) {
-        const updatedAccount = {
-          ...account,
-          balance: balanceMap[account.id]
-        }
-        await this.accountsStore.updateAccount(account.id, updatedAccount)
-      }
-
-      // Перезагружаем данные в accountsStore, чтобы Dashboard.vue увидел обновления
-      await this.accountsStore.loadAccounts()
-
-      alert('Балансы успешно пересчитаны по проводкам')
     }
   }
 }
+
 </script>
 
 <style scoped>

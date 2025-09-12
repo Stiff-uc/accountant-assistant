@@ -1,10 +1,16 @@
 <template>
   <nav class="navigation">
     <div class="nav-logo">
-      <h2>Бухгалтерия</h2>
+      <h5>Бухгалтерия</h5>
     </div>
     
-    <ul class="nav-menu">
+    <button class="hamburger" @click="toggleMenu" aria-label="Открыть меню">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  
+    <ul class="nav-menu" :class="{ 'nav-menu-active': isMenuOpen }">
       <li v-if="isAuthenticated">
         <router-link to="/dashboard" class="nav-link">
           <span>📊</span> Дашборд
@@ -42,16 +48,24 @@
 <script>
 import { useAuthStore } from '../../stores/authStore'
 import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 
 export default {
   name: 'Navigation',
   setup() {
     const authStore = useAuthStore()
     const router = useRouter()
+    const isMenuOpen = ref(false)
+
+    const toggleMenu = () => {
+      isMenuOpen.value = !isMenuOpen.value
+    }
 
     return {
       authStore,
-      router
+      router,
+      isMenuOpen,
+      toggleMenu
     }
   },
   computed: {
@@ -82,6 +96,7 @@ export default {
   left: 0;
   right: 0;
   z-index: 100;
+  position: relative;
 }
 
 .nav-logo h2 {
@@ -90,12 +105,53 @@ export default {
   font-weight: 700;
 }
 
+.hamburger {
+  display: none;
+  flex-direction: column;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 101;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  margin: 3px 0;
+  transition: 0.3s;
+}
+
 .nav-menu {
   display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
   gap: 1rem;
+}
+
+.nav-menu-active {
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #333;
+  padding: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .nav-link {
@@ -134,7 +190,6 @@ export default {
 
 @media (max-width: 768px) {
   .navigation {
-    flex-direction: column;
     padding: 0.75rem;
   }
   
@@ -142,17 +197,46 @@ export default {
     font-size: 1.2rem;
   }
   
+  .hamburger {
+    display: flex;
+  }
+  
   .nav-menu {
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    display: none;
+  }
+  
+  .nav-menu-active {
+    display: flex;
   }
   
   .nav-link,
   .nav-button {
     width: 100%;
-    text-align: center;
+    text-align: left;
     justify-content: center;
+    margin: 0.25rem 0;
   }
+}
+
+/* Force hamburger menu on all mobile screens regardless of orientation */
+@media (max-width: 900px) {
+  .hamburger {
+    display: flex !important;
+  }
+  
+  .nav-menu {
+    display: none !important;
+  }
+  
+  .nav-menu-active {
+    display: flex !important;
+  }
+  .nav-link,
+  .nav-button {
+    width: 100%;
+    text-align: left;
+    justify-content: left;
+    margin: 0 0;
+  }  
 }
 </style>

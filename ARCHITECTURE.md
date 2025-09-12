@@ -118,6 +118,7 @@ class DataService {
   async login(username, password) {}
   async logout() {}
   async getCurrentUser() {}
+  async isAuthenticated() {}
 }
 ```
 
@@ -185,6 +186,7 @@ Counterparties management:
 - Simple authentication with predefined credentials (admin:admin)
 - Route protection using Vue Router navigation guards
 - Data stored in localStorage (will be replaced with server storage in future)
+- The `isAuthenticated` state is managed by `authStore` and is derived from the presence of a valid user session. It is **not** a method of `DataService`, because authentication state is a UI concern, not a data operation. `DataService` provides `login`, `logout`, and `getCurrentUser` — but the boolean flag `isAuthenticated` is maintained by `authStore` to avoid coupling state management with data service logic.
 
 ## Responsiveness
 

@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router/index.js'
 import { createPinia } from 'pinia'
+import { LocalStorageService } from './services/localStorageService'
 
 const app = createApp(App)
 
@@ -11,6 +12,11 @@ app.use(pinia)
 
 // Подключение Vue Router
 app.use(router)
+
+// Проверка: если нет счетов — перенаправить на визард
+if (!localStorage.getItem(LocalStorageService.ACCOUNTS_KEY)) {
+  router.push('/wizard')
+}
 
 // Подключение навигации
 import Navigation from './components/common/Navigation.vue'

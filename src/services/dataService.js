@@ -75,4 +75,9 @@ export class DataService {
   async getCurrentUser() {
     throw new Error('Метод getCurrentUser() должен быть реализован в подклассе')
   }
+
+  // Проверка аутентификации
+  async isAuthenticated() {
+    throw new Error('Метод isAuthenticated() должен быть реализован в подклассе')
+  }
 }

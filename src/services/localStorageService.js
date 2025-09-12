@@ -17,29 +17,52 @@ export class LocalStorageService extends DataService {
   initData() {
     // Инициализация счетов
     if (!localStorage.getItem(LocalStorageService.ACCOUNTS_KEY)) {
-      const defaultAccounts = [
-        { id: uuidv4(), code: '10', name: 'Касса', type: 'asset', isActive: true, balance: 0 },
-        { id: uuidv4(), code: '41', name: 'Расчетный счет', type: 'asset', isActive: true, balance: 0 },
-        { id: uuidv4(), code: '43', name: 'Товары на складе', type: 'asset', isActive: true, balance: 0 },
-        { id: uuidv4(), code: '60', name: 'Расчеты с поставщиками', type: 'liability', isActive: true, balance: 0 },
-        { id: uuidv4(), code: '70', name: 'Расчеты с персоналом', type: 'liability', isActive: true, balance: 0 },
-        { id: uuidv4(), code: '90', name: 'Продажи', type: 'income', isActive: true, balance: 0 },
-        { id: uuidv4(), code: '20', name: 'Закупки', type: 'expense', isActive: true, balance: 0 },
-        { id: uuidv4(), code: '44', name: 'Прочие расходы', type: 'expense', isActive: true, balance: 0 }
-      ]
-      localStorage.setItem(LocalStorageService.ACCOUNTS_KEY, JSON.stringify(defaultAccounts))
+      // Не создаем счета автоматически — перенаправим на визард
+      // Счета будут созданы только после выбора в Wizard.vue
     }
 
     // Инициализация проводок
-    if (!localStorage.getItem(LocalStorageService.TRANSACTIONS_KEY)) {
-      localStorage.setItem(LocalStorageService.TRANSACTIONS_KEY, JSON.stringify([]))
-    }
-
-    // Инициализация контрагентов
-    if (!localStorage.getItem(LocalStorageService.COUNTERPARTIES_KEY)) {
-      localStorage.setItem(LocalStorageService.COUNTERPARTIES_KEY, JSON.stringify([]))
-    }
-  }
+     if (!localStorage.getItem(LocalStorageService.TRANSACTIONS_KEY)) {
+       localStorage.setItem(LocalStorageService.TRANSACTIONS_KEY, JSON.stringify([]))
+     }
+ 
+     // Инициализация контрагентов
+     if (!localStorage.getItem(LocalStorageService.COUNTERPARTIES_KEY)) {
+       localStorage.setItem(LocalStorageService.COUNTERPARTIES_KEY, JSON.stringify([]))
+     }
+   }
+ 
+   // Создание стандартных наборов счетов
+   static async createDefaultAccounts(type) {
+     let accounts = []
+ 
+     if (type === 'default') {
+       accounts = [
+         { id: uuidv4(), code: '10', name: 'Касса', type: 'asset', isActive: true, balance: 0, isFavorite: true },
+         { id: uuidv4(), code: '41', name: 'Расчетный счет', type: 'asset', isActive: true, balance: 0, isFavorite: true },
+         { id: uuidv4(), code: '43', name: 'Товары на складе', type: 'asset', isActive: true, balance: 0, isFavorite: false },
+         { id: uuidv4(), code: '60', name: 'Расчеты с поставщиками', type: 'liability', isActive: true, balance: 0, isFavorite: false },
+         { id: uuidv4(), code: '70', name: 'Расчеты с персоналом', type: 'liability', isActive: true, balance: 0, isFavorite: false },
+         { id: uuidv4(), code: '90', name: 'Продажи', type: 'income', isActive: true, balance: 0, isFavorite: true },
+         { id: uuidv4(), code: '20', name: 'Закупки', type: 'expense', isActive: true, balance: 0, isFavorite: true },
+         { id: uuidv4(), code: '44', name: 'Прочие расходы', type: 'expense', isActive: true, balance: 0, isFavorite: false }
+       ]
+     } else if (type === 'school') {
+       accounts = [
+         { id: uuidv4(), code: '300', name: 'Общая касса', type: 'asset', isActive: true, balance: 0, isFavorite: true },
+         { id: uuidv4(), code: '100', name: 'Сборы с родителей', type: 'income', isActive: true, balance: 0, isFavorite: true },
+         { id: uuidv4(), code: '101', name: 'Пожертвования', type: 'income', isActive: true, balance: 0, isFavorite: false },
+         { id: uuidv4(), code: '200', name: 'Учебные материалы', type: 'expense', isActive: true, balance: 0, isFavorite: true },
+         { id: uuidv4(), code: '201', name: 'Культурные мероприятия', type: 'expense', isActive: true, balance: 0, isFavorite: false },
+         { id: uuidv4(), code: '202', name: 'Дни рождения и праздники', type: 'expense', isActive: true, balance: 0, isFavorite: false },
+         { id: uuidv4(), code: '203', name: 'Транспорт и поездки', type: 'expense', isActive: true, balance: 0, isFavorite: false },
+         { id: uuidv4(), code: '204', name: 'Прочие расходы', type: 'expense', isActive: true, balance: 0, isFavorite: true }
+       ]
+     }
+ 
+     localStorage.setItem(LocalStorageService.ACCOUNTS_KEY, JSON.stringify(accounts))
+     return accounts
+   }
 
   // Счета
   async getAccounts() {
@@ -195,5 +218,10 @@ export class LocalStorageService extends DataService {
   async getCurrentUser() {
     const authStore = useAuthStore()
     return authStore.user
+  }
+
+  // Проверка аутентификации
+  async isAuthenticated() {
+    return localStorage.getItem('isAuthenticated') === 'true'
   }
 }

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { LocalStorageService } from '../services/localStorageService'
+import dataServiceInstance from '../services/dataServiceInstance'
 
 export const useAccountsStore = defineStore('accounts', {
   state: () => ({
@@ -17,7 +17,7 @@ export const useAccountsStore = defineStore('accounts', {
     async loadAccounts() {
       this.loading = true
       try {
-        const data = await new LocalStorageService().getAccounts()
+        const data = await dataServiceInstance.getAccounts()
         console.log('accountsStore.loadAccounts() loaded:', data)
         this.accounts = data
       } catch (error) {
@@ -28,7 +28,7 @@ export const useAccountsStore = defineStore('accounts', {
     },
 
     async createAccount(account) {
-      const result = await new LocalStorageService().createAccount(account)
+      const result = await dataServiceInstance.createAccount(account)
       this.accounts.push(result)
       return result
     },
@@ -36,14 +36,14 @@ export const useAccountsStore = defineStore('accounts', {
     async updateAccount(id, account) {
       const index = this.accounts.findIndex(a => a.id === id)
       if (index !== -1) {
-        const updated = await new LocalStorageService().updateAccount(id, account)
+        const updated = await dataServiceInstance.updateAccount(id, account)
         this.accounts[index] = updated
         return updated
       }
     },
 
     async deleteAccount(id) {
-      await new LocalStorageService().deleteAccount(id)
+      await dataServiceInstance.deleteAccount(id)
       this.accounts = this.accounts.filter(a => a.id !== id)
     }
   }

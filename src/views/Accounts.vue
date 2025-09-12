@@ -222,6 +222,13 @@ export default {
     this.accountsStore.loadAccounts()
   },
   methods: {
+    toggleFavorite(account) {
+      const updatedAccount = {
+        ...account,
+        isFavorite: !account.isFavorite
+      }
+      this.accountsStore.updateAccount(account.id, updatedAccount)
+    },
     formatCurrency(amount) {
       return new Intl.NumberFormat('ru-RU', {
         style: 'currency',

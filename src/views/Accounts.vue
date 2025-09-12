@@ -42,8 +42,8 @@
             <td>{{ accountTypeLabel(account.type) }}</td>
             <td class="amount">{{ formatCurrency(account.balance) }}</td>
             <td>
-              <span 
-                class="status-badge" 
+              <span
+                class="status-badge"
                 :class="{ 'active': account.isActive, 'inactive': !account.isActive }"
               >
                 {{ account.isActive ? 'Активен' : 'Неактивен' }}
@@ -65,6 +65,53 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Карточки счетов (для мобильных) -->
+    <div class="accounts-cards">
+      <div
+        v-for="account in accountsStore.accounts.sort((a, b) => a.code.localeCompare(b.code))"
+        :key="account.id"
+        class="account-card"
+        :class="{ 'inactive-account': !account.isActive }"
+      >
+        <div class="card-header">
+          <span
+            class="favorite-icon"
+            :class="{ 'favorite': account.isFavorite }"
+            @click="toggleFavorite(account)"
+          >
+            {{ account.isFavorite ? '⭐' : '☆' }}
+          </span>
+          <h3>{{ account.name }}</h3>
+          <span class="account-code">{{ account.code }}</span>
+        </div>
+        
+        <div class="card-body">
+          <p><strong>Тип:</strong> {{ accountTypeLabel(account.type) }}</p>
+          <p><strong>Баланс:</strong> {{ formatCurrency(account.balance) }}</p>
+          <p>
+            <span
+              class="status-badge"
+              :class="{ 'active': account.isActive, 'inactive': !account.isActive }"
+            >
+              {{ account.isActive ? 'Активен' : 'Неактивен' }}
+            </span>
+          </p>
+        </div>
+        
+        <div class="card-actions">
+          <button @click="editAccount(account)" class="edit-button">
+            Редактировать
+          </button>
+          <button @click="deleteAccount(account)" class="delete-button">
+            Удалить
+          </button>
+        </div>
+      </div>
+      <div v-if="accountsStore.accounts.length === 0" class="no-data-card">
+        Нет счетов
+      </div>
     </div>
    
     <button @click="recalculateBalances" class="recalculate-button">
@@ -322,7 +369,68 @@ export default {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  margin-top: 70px;
+}
+
+/* Стили карточек для мобильной версии */
+.accounts-cards {
+  display: none;
+  margin-top: 2rem;
+}
+
+.account-card {
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.account-card.inactive-account {
+  opacity: 0.7;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.account-code {
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.card-body {
+  margin-bottom: 1rem;
+}
+
+.card-body p {
+  margin: 0.3rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.no-data-card {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem;
+  font-size: 1.1rem;
 }
 
 .favorite-icon {
@@ -379,6 +487,7 @@ h1 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   overflow: hidden;
+  table-layout: fixed;
 }
 
 .accounts-table th,
@@ -568,7 +677,7 @@ h1 {
   background-color: #5a6268;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 899px) {
   .accounts-container {
     padding: 1rem;
   }
@@ -581,6 +690,27 @@ h1 {
   .form-card {
     margin: 1rem;
     padding: 1.5rem;
+  }
+
+  /* Скрываем таблицу на мобильных */
+  .accounts-table {
+    display: none;
+  }
+
+  /* Показываем карточки на мобильных */
+  .accounts-cards {
+    display: block;
+  }
+}
+
+/* Для десктопа: скрываем карточки, показываем таблицу */
+@media (min-width: 900px) {
+  .accounts-cards {
+    display: none;
+  }
+
+  .accounts-table {
+    display: table;
   }
 }
 </style>

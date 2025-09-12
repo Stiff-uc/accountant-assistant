@@ -186,8 +186,13 @@ Counterparties management:
 - Route protection using Vue Router navigation guards
 - Data stored in localStorage (will be replaced with server storage in future)
 
-## Адаптивность
+## Responsiveness
 
-- Использование CSS Grid и Flexbox для адаптивного дизайна
-- Мобильная-first разработка
-- Поддержка различных размеров экранов
+- Utilizes CSS Grid and Flexbox for responsive design
+- Mobile-first development approach
+- Adaptive layout switching based on screen width:
+  - **Mobile & Tablet (≤ 899px)**: Card-based UI for better touch interaction and vertical scrolling
+  - **Desktop (≥ 900px)**: Traditional table-based UI for efficient data comparison and bulk operations
+- Media queries enforce the transition between UI modes at 900px breakpoint
+- All three data views (Transactions, Accounts, Counterparties) follow the same responsive pattern
+- Table layout uses `table-layout: fixed` to ensure consistent column width distribution across devices

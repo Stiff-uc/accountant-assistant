@@ -66,8 +66,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="transaction in filteredTransactions" 
+          <tr
+            v-for="transaction in filteredTransactions"
             :key="transaction.id"
           >
             <td>{{ formatDate(transaction.date) }}</td>
@@ -92,6 +92,52 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Карточки проводок (для мобильных) -->
+    <div class="transactions-cards">
+      <div
+        v-for="transaction in filteredTransactions"
+        :key="transaction.id"
+        class="transaction-card"
+      >
+        <div class="card-header">
+          <span class="transaction-date">{{ formatDate(transaction.date) }}</span>
+          <span class="transaction-amount">{{ formatCurrency(transaction.amount) }}</span>
+        </div>
+        
+        <div class="card-body">
+          <p class="transaction-description">{{ transaction.description }}</p>
+          
+          <div class="transaction-accounts">
+            <div class="account-item debit">
+              <span class="account-label">Дебет:</span>
+              <span class="account-name">{{ getAccountName(transaction.debitAccountId) }}</span>
+            </div>
+            <div class="account-item credit">
+              <span class="account-label">Кредит:</span>
+              <span class="account-name">{{ getAccountName(transaction.creditAccountId) }}</span>
+            </div>
+          </div>
+          
+          <div class="transaction-counterparty" v-if="transaction.counterpartyId">
+            <span class="account-label">Контрагент:</span>
+            <span class="account-name">{{ getCounterpartyName(transaction.counterpartyId) }}</span>
+          </div>
+        </div>
+        
+        <div class="card-actions">
+          <button @click="editTransaction(transaction)" class="edit-button">
+            Редактировать
+          </button>
+          <button @click="deleteTransaction(transaction)" class="delete-button">
+            Удалить
+          </button>
+        </div>
+      </div>
+      <div v-if="filteredTransactions.length === 0" class="no-data-card">
+        Нет проводок
+      </div>
     </div>
 
     <!-- Форма добавления/редактирования -->
@@ -379,7 +425,96 @@ export default {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  margin-top: 70px;
+}
+
+/* Стили карточек для мобильной версии */
+.transactions-cards {
+  display: none;
+  margin-top: 2rem;
+}
+
+.transaction-card {
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.transaction-date {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.transaction-amount {
+  font-weight: 700;
+  color: #007bff;
+  font-size: 1.1rem;
+}
+
+.card-body {
+  margin-bottom: 1rem;
+}
+
+.transaction-description {
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.transaction-accounts {
+  margin-bottom: 0.5rem;
+}
+
+.account-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.account-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.account-name {
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.transaction-counterparty {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding: 0.3rem 0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.no-data-card {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem;
+  font-size: 1.1rem;
 }
 
 h1 {
@@ -478,6 +613,7 @@ h1 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   overflow: hidden;
+  table-layout: fixed;
 }
 
 .transactions-table th,
@@ -629,7 +765,7 @@ h1 {
   background-color: #5a6268;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 899px) {
   .transactions-container {
     padding: 1rem;
   }
@@ -652,6 +788,27 @@ h1 {
   .form-card {
     margin: 1rem;
     padding: 1.5rem;
+  }
+
+  /* Скрываем таблицу на мобильных */
+  .transactions-table {
+    display: none;
+  }
+
+  /* Показываем карточки на мобильных */
+  .transactions-cards {
+    display: block;
+  }
+}
+
+/* Для десктопа: скрываем карточки, показываем таблицу */
+@media (min-width: 900px) {
+  .transactions-cards {
+    display: none;
+  }
+
+  .transactions-table {
+    display: table;
   }
 }
 </style>

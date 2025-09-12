@@ -199,7 +199,6 @@ export default {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  margin-top: 70px;
 }
 
 h1 {

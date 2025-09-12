@@ -22,8 +22,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="counterparty in counterpartiesStore.counterparties" 
+          <tr
+            v-for="counterparty in counterpartiesStore.counterparties"
             :key="counterparty.id"
           >
             <td>{{ counterparty.name }}</td>
@@ -46,6 +46,31 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Карточки контрагентов (для мобильных) -->
+    <div class="counterparties-cards">
+      <div
+        v-for="counterparty in counterpartiesStore.counterparties"
+        :key="counterparty.id"
+        class="counterparty-card"
+      >
+        <h3>{{ counterparty.name }}</h3>
+        <p><strong>ИНН:</strong> {{ counterparty.inn || '-' }}</p>
+        <p><strong>Телефон:</strong> {{ counterparty.phone || '-' }}</p>
+        <p><strong>Email:</strong> {{ counterparty.email || '-' }}</p>
+        <div class="card-actions">
+          <button @click="editCounterparty(counterparty)" class="edit-button">
+            Редактировать
+          </button>
+          <button @click="deleteCounterparty(counterparty)" class="delete-button">
+            Удалить
+          </button>
+        </div>
+      </div>
+      <div v-if="counterpartiesStore.counterparties.length === 0" class="no-data-card">
+        Нет контрагентов
+      </div>
     </div>
 
     <!-- Форма добавления/редактирования -->
@@ -222,7 +247,47 @@ export default {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  margin-top: 70px;
+}
+
+/* Стили карточек для мобильной версии */
+.counterparties-cards {
+  display: none;
+  margin-top: 2rem;
+}
+
+.counterparty-card {
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.counterparty-card h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.counterparty-card p {
+  margin: 0.3rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.no-data-card {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem;
+  font-size: 1.1rem;
 }
 
 h1 {
@@ -263,6 +328,7 @@ h1 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   overflow: hidden;
+  table-layout: fixed;
 }
 
 .counterparties-table th,
@@ -407,7 +473,7 @@ h1 {
   background-color: #5a6268;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 899px) {
   .counterparties-container {
     padding: 1rem;
   }
@@ -420,6 +486,27 @@ h1 {
   .form-card {
     margin: 1rem;
     padding: 1.5rem;
+  }
+
+  /* Скрываем таблицу на мобильных */
+  .counterparties-table {
+    display: none;
+  }
+
+  /* Показываем карточки на мобильных */
+  .counterparties-cards {
+    display: block;
+  }
+}
+
+/* Для десктопа: скрываем карточки, показываем таблицу */
+@media (min-width: 900px) {
+  .counterparties-cards {
+    display: none;
+  }
+
+  .counterparties-table {
+    display: table;
   }
 }
 </style>

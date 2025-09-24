@@ -331,15 +331,37 @@ export default {
         balanceMap[account.id] = 0
       })
 
+      // Создаем карту для быстрого доступа к счетам по ID
+      const accountMap = {}
+      accounts.forEach(account => {
+        accountMap[account.id] = account
+      })
+
       // Проходим по всем проводкам
       transactions.forEach(transaction => {
-        // Дебет — уменьшает баланс
-        if (balanceMap[transaction.debitAccountId] !== undefined) {
-          balanceMap[transaction.debitAccountId] -= transaction.amount
+        const debitAccount = accountMap[transaction.debitAccountId]
+        const creditAccount = accountMap[transaction.creditAccountId]
+        
+        // Обрабатываем дебетовый счет
+        if (debitAccount) {
+          if (debitAccount.type === 'asset' || debitAccount.type === 'expense') {
+            // Для активов и расходов: дебет увеличивает баланс
+            balanceMap[transaction.debitAccountId] += transaction.amount
+          } else { // liability, income
+            // Для обязательств и доходов: дебет уменьшает баланс
+            balanceMap[transaction.debitAccountId] -= transaction.amount
+          }
         }
-        // Кредит — увеличивает баланс
-        if (balanceMap[transaction.creditAccountId] !== undefined) {
-          balanceMap[transaction.creditAccountId] += transaction.amount
+        
+        // Обрабатываем кредитовый счет
+        if (creditAccount) {
+          if (creditAccount.type === 'asset' || creditAccount.type === 'expense') {
+            // Для активов и расходов: кредит уменьшает баланс
+            balanceMap[transaction.creditAccountId] -= transaction.amount
+          } else { // liability, income
+            // Для обязательств и доходов: кредит увеличивает баланс
+            balanceMap[transaction.creditAccountId] += transaction.amount
+          }
         }
       })
 

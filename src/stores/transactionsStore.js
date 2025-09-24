@@ -49,12 +49,28 @@ export const useTransactionsStore = defineStore('transactions', {
       const creditAccount = useAccountsStore().getAccountById(transaction.creditAccountId)
       
       if (debitAccount) {
-        const updatedDebitAccount = { ...debitAccount, balance: debitAccount.balance - transaction.amount }
-        useAccountsStore().updateAccount(debitAccount.id, updatedDebitAccount)
+        // Для дебетового счета: увеличиваем баланс для активов и расходов, уменьшаем для обязательств и доходов
+        let newBalance
+        if (debitAccount.type === 'asset' || debitAccount.type === 'expense') {
+          newBalance = debitAccount.balance + transaction.amount
+        } else { // liability, income
+          newBalance = debitAccount.balance - transaction.amount
+        }
+        const updatedDebitAccount = { ...debitAccount, balance: newBalance }
+        console.log('Updating debit account:', updatedDebitAccount)
+        await useAccountsStore().updateAccount(debitAccount.id, updatedDebitAccount)
       }
       if (creditAccount) {
-        const updatedCreditAccount = { ...creditAccount, balance: creditAccount.balance + transaction.amount }
-        useAccountsStore().updateAccount(creditAccount.id, updatedCreditAccount)
+        // Для кредитового счета: уменьшаем баланс для активов и расходов, увеличиваем для обязательств и доходов
+        let newBalance
+        if (creditAccount.type === 'asset' || creditAccount.type === 'expense') {
+          newBalance = creditAccount.balance - transaction.amount
+        } else { // liability, income
+          newBalance = creditAccount.balance + transaction.amount
+        }
+        const updatedCreditAccount = { ...creditAccount, balance: newBalance }
+        console.log('Updating credit account:', updatedCreditAccount)
+        await useAccountsStore().updateAccount(creditAccount.id, updatedCreditAccount)
       }
 
       return result
@@ -63,8 +79,70 @@ export const useTransactionsStore = defineStore('transactions', {
     async updateTransaction(id, transaction) {
       const index = this.transactions.findIndex(t => t.id === id)
       if (index !== -1) {
+        const originalTransaction = this.transactions[index]
+        
+        // Обновляем проводку в хранилище
         const updated = await new LocalStorageService().updateTransaction(id, transaction)
         this.transactions[index] = updated
+        
+        // Восстанавливаем остатки по счетам для исходной проводки
+        const originalDebitAccount = useAccountsStore().getAccountById(originalTransaction.debitAccountId)
+        const originalCreditAccount = useAccountsStore().getAccountById(originalTransaction.creditAccountId)
+        
+        if (originalDebitAccount) {
+          // Для дебетового счета откат: уменьшаем баланс для активов и расходов, увеличиваем для обязательств и доходов
+          let newBalance
+          if (originalDebitAccount.type === 'asset' || originalDebitAccount.type === 'expense') {
+            newBalance = originalDebitAccount.balance - originalTransaction.amount
+          } else { // liability, income
+            newBalance = originalDebitAccount.balance + originalTransaction.amount
+          }
+          const restoredDebitAccount = { ...originalDebitAccount, balance: newBalance }
+          console.log('Rolling back old debit account:', restoredDebitAccount)
+          await useAccountsStore().updateAccount(originalDebitAccount.id, restoredDebitAccount)
+        }
+        if (originalCreditAccount) {
+          // Для кредитового счета откат: увеличиваем баланс для активов и расходов, уменьшаем для обязательств и доходов
+          let newBalance
+          if (originalCreditAccount.type === 'asset' || originalCreditAccount.type === 'expense') {
+            newBalance = originalCreditAccount.balance + originalTransaction.amount
+          } else { // liability, income
+            newBalance = originalCreditAccount.balance - originalTransaction.amount
+          }
+          const restoredCreditAccount = { ...originalCreditAccount, balance: newBalance }
+          console.log('Rolling back old credit account:', restoredCreditAccount)
+          await useAccountsStore().updateAccount(originalCreditAccount.id, restoredCreditAccount)
+        }
+        
+        // Обновляем остатки по счетам для измененной проводки
+        const debitAccount = useAccountsStore().getAccountById(transaction.debitAccountId)
+        const creditAccount = useAccountsStore().getAccountById(transaction.creditAccountId)
+        
+        if (debitAccount) {
+          // Для дебетового счета: увеличиваем баланс для активов и расходов, уменьшаем для обязательств и доходов
+          let newBalance
+          if (debitAccount.type === 'asset' || debitAccount.type === 'expense') {
+            newBalance = debitAccount.balance + transaction.amount
+          } else { // liability, income
+            newBalance = debitAccount.balance - transaction.amount
+          }
+          const updatedDebitAccount = { ...debitAccount, balance: newBalance }
+          console.log('Updating new debit account:', updatedDebitAccount)
+          await useAccountsStore().updateAccount(debitAccount.id, updatedDebitAccount)
+        }
+        if (creditAccount) {
+          // Для кредитового счета: уменьшаем баланс для активов и расходов, увеличиваем для обязательств и доходов
+          let newBalance
+          if (creditAccount.type === 'asset' || creditAccount.type === 'expense') {
+            newBalance = creditAccount.balance - transaction.amount
+          } else { // liability, income
+            newBalance = creditAccount.balance + transaction.amount
+          }
+          const updatedCreditAccount = { ...creditAccount, balance: newBalance }
+          console.log('Updating new credit account:', updatedCreditAccount)
+          await useAccountsStore().updateAccount(creditAccount.id, updatedCreditAccount)
+        }
+        
         return updated
       }
     },
@@ -81,12 +159,28 @@ export const useTransactionsStore = defineStore('transactions', {
       const creditAccount = useAccountsStore().getAccountById(transaction.creditAccountId)
       
       if (debitAccount) {
-        const updatedDebitAccount = { ...debitAccount, balance: debitAccount.balance + transaction.amount }
-        useAccountsStore().updateAccount(debitAccount.id, updatedDebitAccount)
+        // Для дебетового счета откат: уменьшаем баланс для активов и расходов, увеличиваем для обязательств и доходов
+        let newBalance
+        if (debitAccount.type === 'asset' || debitAccount.type === 'expense') {
+          newBalance = debitAccount.balance - transaction.amount
+        } else { // liability, income
+          newBalance = debitAccount.balance + transaction.amount
+        }
+        const updatedDebitAccount = { ...debitAccount, balance: newBalance }
+        console.log('Rolling back debit account:', updatedDebitAccount)
+        await useAccountsStore().updateAccount(debitAccount.id, updatedDebitAccount)
       }
       if (creditAccount) {
-        const updatedCreditAccount = { ...creditAccount, balance: creditAccount.balance - transaction.amount }
-        useAccountsStore().updateAccount(creditAccount.id, updatedCreditAccount)
+        // Для кредитового счета откат: увеличиваем баланс для активов и расходов, уменьшаем для обязательств и доходов
+        let newBalance
+        if (creditAccount.type === 'asset' || creditAccount.type === 'expense') {
+          newBalance = creditAccount.balance + transaction.amount
+        } else { // liability, income
+          newBalance = creditAccount.balance - transaction.amount
+        }
+        const updatedCreditAccount = { ...creditAccount, balance: newBalance }
+        console.log('Rolling back credit account:', updatedCreditAccount)
+        await useAccountsStore().updateAccount(creditAccount.id, updatedCreditAccount)
       }
     }
   }

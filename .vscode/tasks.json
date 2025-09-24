@@ -1,0 +1,94 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Dev Server",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+)\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "  VITE v",
+          "endsPattern": "Local:   http://localhost:\\d+/"
+        }
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Open Dev Server in External Terminal",
+      "type": "shell",
+      "command": "start cmd /k npm run dev",
+      "windows": {
+        "command": "start cmd /k npm run dev"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Open Dev Server in New Window",
+      "type": "shell",
+      "command": "wt -w 0 nt cmd /k npm run dev",
+      "windows": {
+        "command": "wt -w 0 nt cmd /k npm run dev"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start Dev Server in External Terminal",
+      "type": "shell",
+      "command": "start cmd /k npm run dev",
+      "windows": {
+        "command": "start cmd /k npm run dev"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+)\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "  VITE v",
+          "endsPattern": "Local:   http://localhost:\\d+/"
+        }
+      },
+      "isBackground": true
+    }
+  ]
+}

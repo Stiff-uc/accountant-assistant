@@ -5,20 +5,31 @@
     <!-- Фильтры -->
     <div class="filters">
       <div class="filter-group">
-        <label for="report-date">Дата</label>
+        <label for="start-date">Дата начала</label>
         <input
-          id="report-date"
-          v-model="selectedDate"
+          id="start-date"
+          v-model="formStartDate"
           type="date"
+          @change="hideReportDetails"
+        />
+      </div>
+      
+      <div class="filter-group">
+        <label for="end-date">Дата окончания</label>
+        <input
+          id="end-date"
+          v-model="formEndDate"
+          type="date"
+          @change="hideReportDetails"
         />
       </div>
 
       <div class="filter-group">
         <label for="account-filter">Счёт</label>
-        <select id="account-filter" v-model="selectedAccountId">
+        <select id="account-filter" v-model="formAccountId" @change="hideReportDetails">
           <option value="">Все счета</option>
-          <option 
-            v-for="account in accountsStore.accounts" 
+          <option
+            v-for="account in accountsStore.accounts"
             :key="account.id"
             :value="account.id"
           >
@@ -33,30 +44,30 @@
     </div>
 
     <!-- Шахматная ведомость -->
-    <div class="chess-board" v-if="reportData.length > 0">
+    <div class="chess-board" v-if="showReportDetails && reportData.length > 0">
       <div class="chess-header">
         <div class="chess-cell empty"></div>
-        <div 
-          class="chess-cell account-header" 
-          v-for="account in accountsStore.accounts" 
+        <div
+          class="chess-cell account-header"
+          v-for="account in accountsStore.accounts"
           :key="account.id"
         >
           {{ account.code }}<br>{{ account.name }}
         </div>
       </div>
 
-      <div 
-        class="chess-row" 
-        v-for="debitAccount in accountsStore.accounts" 
+      <div
+        class="chess-row"
+        v-for="debitAccount in accountsStore.accounts"
         :key="debitAccount.id"
       >
         <div class="chess-cell account-header">
           {{ debitAccount.code }}<br>{{ debitAccount.name }}
         </div>
         
-        <div 
-          class="chess-cell" 
-          v-for="creditAccount in accountsStore.accounts" 
+        <div
+          class="chess-cell"
+          v-for="creditAccount in accountsStore.accounts"
           :key="creditAccount.id"
           :class="{
             'debit-credit': getBalance(debitAccount.id, creditAccount.id) > 0,
@@ -69,12 +80,12 @@
       </div>
     </div>
 
-    <div v-else class="no-data">
+    <div v-else-if="showReportDetails" class="no-data">
       Нет данных
     </div>
 
     <!-- Сводка -->
-    <div class="summary">
+    <div class="summary" v-if="showReportDetails">
       <h3>Сводка</h3>
       <div class="summary-item">
         <span>Всего дебетов:</span>
@@ -89,6 +100,10 @@
         <span class="amount">{{ formatCurrency(netBalance) }}</span>
       </div>
     </div>
+    
+    <div v-else class="no-data">
+      Нажмите "Сгенерировать" для отображения отчета
+    </div>
   </div>
 </template>
 
@@ -102,9 +117,14 @@ export default {
     return {
       accountsStore: useAccountsStore(),
       transactionsStore: useTransactionsStore(),
-      selectedDate: '',
-      selectedAccountId: '',
-      reportData: []
+      // Form parameters
+      formStartDate: '',
+      formEndDate: '',
+      formAccountId: '',
+      // Report data
+      reportData: [],
+      filteredTransactions: [],
+      showReportDetails: false
     }
   },
   computed: {
@@ -131,8 +151,20 @@ export default {
   mounted() {
     this.accountsStore.loadAccounts()
     this.transactionsStore.loadTransactions()
-    this.selectedDate = new Date().toISOString().split('T')[0]
-    this.generateReport()
+    
+    // Устанавливаем диапазон дат: начало текущего месяца и сегодня
+    const today = new Date()
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+    
+    this.formEndDate = today.toISOString().split('T')[0]
+    this.formStartDate = firstDayOfMonth.toISOString().split('T')[0]
+    
+    // Инициализируем пустые массивы для данных отчета
+    this.filteredTransactions = []
+    this.reportData = []
+    
+    // Не показываем детали отчета до нажатия кнопки
+    this.showReportDetails = false
   },
   methods: {
     formatCurrency(amount) {
@@ -146,22 +178,10 @@ export default {
       // Если это диагональ (счет сам с собой), возвращаем 0
       if (debitAccountId === creditAccountId) return 0
       
-      // Получаем все проводки, связанные с этими счетами
-      const transactions = this.transactionsStore.transactions.filter(t => {
+      // Используем уже отфильтрованные проводки
+      const transactions = this.filteredTransactions.filter(t => {
         const matchesDebit = t.debitAccountId === debitAccountId && t.creditAccountId === creditAccountId
         const matchesCredit = t.debitAccountId === creditAccountId && t.creditAccountId === debitAccountId
-        
-        // Применяем фильтр по дате, если выбрана
-        if (this.selectedDate) {
-          return (matchesDebit || matchesCredit) && t.date === this.selectedDate
-        }
-        
-        // Применяем фильтр по счету, если выбран
-        if (this.selectedAccountId) {
-          return (matchesDebit || matchesCredit) && 
-                 (t.debitAccountId === this.selectedAccountId || t.creditAccountId === this.selectedAccountId)
-        }
-        
         return matchesDebit || matchesCredit
       })
       
@@ -178,7 +198,30 @@ export default {
       return balance
     },
     
+    hideReportDetails() {
+      this.showReportDetails = false
+    },
+    
     generateReport() {
+      // Фильтруем проводки на основе параметров формы
+      this.filteredTransactions = this.transactionsStore.transactions.filter(t => {
+        // Применяем фильтр по диапазону дат, если выбраны обе даты
+        if (this.formStartDate && this.formEndDate) {
+          if (t.date < this.formStartDate || t.date > this.formEndDate) {
+            return false
+          }
+        }
+        
+        // Применяем фильтр по счету, если выбран
+        if (this.formAccountId) {
+          if (t.debitAccountId !== this.formAccountId && t.creditAccountId !== this.formAccountId) {
+            return false
+          }
+        }
+        
+        return true
+      })
+      
       // Создаем матрицу для шахматной ведомости
       this.reportData = []
       
@@ -189,6 +232,9 @@ export default {
         })
         this.reportData.push(row)
       })
+      
+      // Показываем детали отчета после генерации
+      this.showReportDetails = true
     }
   }
 }

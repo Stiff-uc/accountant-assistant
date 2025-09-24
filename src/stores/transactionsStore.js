@@ -15,6 +15,9 @@ export const useTransactionsStore = defineStore('transactions', {
     getTransactionsByDate: (state) => (date) => {
       return state.transactions.filter(t => t.date === date)
     },
+    getTransactionsByDateRange: (state) => (startDate, endDate) => {
+      return state.transactions.filter(t => t.date >= startDate && t.date <= endDate)
+    },
     getTransactionsByAccount: (state) => (accountId) => {
       return state.transactions.filter(
         t => t.debitAccountId === accountId || t.creditAccountId === accountId

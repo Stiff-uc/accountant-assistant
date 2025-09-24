@@ -12,32 +12,32 @@
   
     <ul class="nav-menu" :class="{ 'nav-menu-active': isMenuOpen }">
       <li v-if="isAuthenticated">
-        <router-link to="/dashboard" class="nav-link">
+        <router-link to="/dashboard" class="nav-link" @click="closeMenu">
           <span>📊</span> Дашборд
         </router-link>
       </li>
       <li v-if="isAuthenticated">
-        <router-link to="/transactions" class="nav-link">
+        <router-link to="/transactions" class="nav-link" @click="closeMenu">
           <span>📝</span> Проводки
         </router-link>
       </li>
       <li v-if="isAuthenticated">
-        <router-link to="/accounts" class="nav-link">
+        <router-link to="/accounts" class="nav-link" @click="closeMenu">
           <span>💰</span> Счета
         </router-link>
       </li>
       <li v-if="isAuthenticated">
-        <router-link to="/counterparties" class="nav-link">
+        <router-link to="/counterparties" class="nav-link" @click="closeMenu">
           <span>👥</span> Контрагенты
         </router-link>
       </li>
       <li v-if="isAuthenticated">
-        <router-link to="/chess-report" class="nav-link">
+        <router-link to="/chess-report" class="nav-link" @click="closeMenu">
           <span>♟️</span> Шахматка
         </router-link>
       </li>
       <li>
-        <button @click="logout" class="nav-button">
+        <button @click="handleLogout" class="nav-button">
           <span>🚪</span> Выйти
         </button>
       </li>
@@ -48,7 +48,7 @@
 <script>
 import { useAuthStore } from '../../stores/authStore'
 import { useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 export default {
   name: 'Navigation',
@@ -61,11 +61,31 @@ export default {
       isMenuOpen.value = !isMenuOpen.value
     }
 
+    const closeMenu = () => {
+      isMenuOpen.value = false
+    }
+
+    const handleClickOutside = (event) => {
+      const nav = document.querySelector('.navigation')
+      if (isMenuOpen.value && nav && !nav.contains(event.target)) {
+        closeMenu()
+      }
+    }
+
+    onMounted(() => {
+      document.addEventListener('click', handleClickOutside)
+    })
+
+    onBeforeUnmount(() => {
+      document.removeEventListener('click', handleClickOutside)
+    })
+
     return {
       authStore,
       router,
       isMenuOpen,
-      toggleMenu
+      toggleMenu,
+      closeMenu
     }
   },
   computed: {
@@ -74,8 +94,9 @@ export default {
     }
   },
   methods: {
-    logout() {
+    handleLogout() {
       this.authStore.logout()
+      this.closeMenu()
       this.router.push('/login')
     }
   }

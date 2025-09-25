@@ -1,6 +1,6 @@
 # Architecture Diagram of the Accounting Application
 
-## Updated: September 12, 2025
+## Updated: September 25, 2025
 
 ## Overall Application Architecture
 
@@ -13,9 +13,10 @@ graph TB
         E[Accounts.vue] --> B
         F[Counterparties.vue] --> B
         G[ChessReport.vue] --> B
+        W[Wizard.vue] --> B
         
         subgraph "Common Components"
-            H[LoginForm.vue]
+            H[HelloWorld.vue]
             I[Navigation.vue]
         end
     end
@@ -96,19 +97,26 @@ sequenceDiagram
 ```mermaid
 graph TD
     A[Start] --> B{Is user authenticated?}
-    B -->|Yes| C[Show navigation and dashboard]
     B -->|No| D[Redirect to login page]
+    B -->|Yes| C{Accounts exist?}
+    C -->|No| W[Show Wizard]
+    C -->|Yes| E[Show navigation and dashboard]
     
-    C --> E[Dashboard.vue]
-    C --> F[Transactions.vue]
-    C --> G[Accounts.vue]
-    C --> H[Counterparties.vue]
-    C --> I[ChessReport.vue]
+    E --> F[Dashboard.vue]
+    E --> G[Transactions.vue]
+    E --> H[Accounts.vue]
+    E --> I[Counterparties.vue]
+    E --> J[ChessReport.vue]
     
-    D --> J[Login.vue]
-    J --> K{Successful authentication?}
-    K -->|Yes| C
-    K -->|No| J
+    D --> K[Login.vue]
+    K --> L{Successful authentication?}
+    L -->|No| K
+    L -->|Yes| C
+    
+    W --> M[Wizard.vue]
+    M --> N{Account set selected?}
+    N -->|Yes| E
+    N -->|No| M
 ```
 
 ## Data Abstraction Layer

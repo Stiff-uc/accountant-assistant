@@ -78,46 +78,84 @@
       <div class="form-card">
         <h2>{{ editingCounterparty ? 'Редактировать контрагента' : 'Добавить контрагента' }}</h2>
         
+        <!-- Общая ошибка -->
+        <div v-if="generalError" class="error-message general-error">
+          {{ generalError }}
+        </div>
+        
         <form @submit.prevent="saveCounterparty">
-          <div class="form-group">
-            <label for="counterparty-name">Название</label>
+          <div class="form-group" :class="{ 'has-error': errors.name }">
+            <label for="counterparty-name">Название <span class="required">*</span></label>
             <input
               id="counterparty-name"
               v-model="form.name"
               type="text"
               required
               placeholder="Введите название"
+              :class="{ 'error-input': errors.name }"
+              @focus="focusedField = 'name'"
+              @blur="focusedField = null"
             />
+            <div v-if="errors.name" class="error-message">
+              {{ errors.name }}
+            </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" :class="{ 'has-error': errors.inn }">
             <label for="counterparty-inn">ИНН</label>
             <input
               id="counterparty-inn"
               v-model="form.inn"
               type="text"
               placeholder="Введите ИНН"
+              :class="{ 'error-input': errors.inn }"
+              @focus="focusedField = 'inn'"
+              @blur="focusedField = null"
             />
+            <div v-if="errors.inn" class="error-message">
+              {{ errors.inn }}
+            </div>
+            <div v-else-if="focusedField === 'inn'" class="helper-text">
+              ИНН должен содержать 10 или 12 цифр
+            </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" :class="{ 'has-error': errors.phone }">
             <label for="counterparty-phone">Телефон</label>
             <input
               id="counterparty-phone"
               v-model="form.phone"
               type="text"
               placeholder="Введите телефон"
+              :class="{ 'error-input': errors.phone }"
+              @focus="focusedField = 'phone'"
+              @blur="focusedField = null"
             />
+            <div v-if="errors.phone" class="error-message">
+              {{ errors.phone }}
+            </div>
+            <div v-else-if="focusedField === 'phone'" class="helper-text">
+              Телефон должен содержать только цифры, пробелы, дефисы и скобки
+            </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" :class="{ 'has-error': errors.email }">
             <label for="counterparty-email">Электронная почта</label>
             <input
               id="counterparty-email"
               v-model="form.email"
               type="email"
               placeholder="Введите email"
+              :class="{ 'error-input': errors.email }"
+              @focus="focusedField = 'email'"
+              @blur="focusedField = null"
             />
+            <div v-if="errors.email" class="error-message">
+              {{ errors.email }}
+            </div>
+            <div v-else-if="focusedField === 'email'" class="helper-text">
+              Email должен быть в корректном формате (example@domain.com)
+            </div>
           </div>
 
           <div class="form-group">
@@ -127,7 +165,12 @@
               v-model="form.address"
               type="text"
               placeholder="Введите адрес"
+              @focus="focusedField = 'address'"
+              @blur="focusedField = null"
             />
+            <div v-if="focusedField === 'address'" class="helper-text">
+              Физический или юридический адрес контрагента
+            </div>
           </div>
 
           <div class="form-actions">
@@ -161,7 +204,16 @@ export default {
         phone: '',
         email: '',
         address: ''
-      }
+      },
+      errors: {
+        name: '',
+        inn: '',
+        phone: '',
+        email: '',
+        address: ''
+      },
+      generalError: '',
+      focusedField: null
     }
   },
   mounted() {
@@ -177,6 +229,7 @@ export default {
         email: '',
         address: ''
       }
+      this.clearErrors()
       this.showForm = true
     },
     
@@ -189,6 +242,7 @@ export default {
         email: counterparty.email,
         address: counterparty.address
       }
+      this.clearErrors()
       this.showForm = true
     },
     
@@ -205,8 +259,13 @@ export default {
       
       const counterpartyModel = new Counterparty(counterparty)
       const { isValid, errors } = counterpartyModel.validate()
+      
+      // Очищаем предыдущие ошибки
+      this.clearErrors()
+      
       if (!isValid) {
-        alert('Пожалуйста, исправьте ошибки в форме')
+        // Обрабатываем ошибки валидации
+        this.processValidationErrors(errors)
         return
       }
       
@@ -220,8 +279,34 @@ export default {
         this.showForm = false
         this.editingCounterparty = null
       } catch (error) {
-        alert('Не удалось сохранить контрагента')
+        this.generalError = 'Не удалось сохранить контрагента'
       }
+    },
+    
+    clearErrors() {
+      this.errors = {
+        name: '',
+        inn: '',
+        phone: '',
+        email: '',
+        address: ''
+      }
+      this.generalError = ''
+    },
+    
+    processValidationErrors(errors) {
+      // Обрабатываем ошибки валидации и распределяем их по полям
+      errors.forEach(error => {
+        if (error.includes('Наименование контрагента обязательно')) {
+          this.errors.name = error
+        } else if (error.includes('ИНН')) {
+          this.errors.inn = error
+        } else if (error.includes('Телефон')) {
+          this.errors.phone = error
+        } else if (error.includes('Email')) {
+          this.errors.email = error
+        }
+      })
     },
     
     async deleteCounterparty(counterparty) {
@@ -237,6 +322,7 @@ export default {
     cancelForm() {
       this.showForm = false
       this.editingCounterparty = null
+      this.clearErrors()
     }
   }
 }
@@ -422,6 +508,7 @@ h1 {
 
 .form-group {
   margin-bottom: 1.5rem;
+  position: relative;
 }
 
 .form-group label {
@@ -437,6 +524,65 @@ h1 {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Стили для ошибок */
+.form-group.has-error label {
+  color: #dc3545;
+}
+
+.form-group .error-input {
+  border-color: #dc3545;
+}
+
+.form-group .error-input:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.85rem;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  z-index: 1;
+}
+
+.helper-text {
+  color: #6c757d;
+  font-size: 0.85rem;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  z-index: 1;
+  background-color: white;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.required {
+  color: #dc3545;
+  margin-left: 0.2rem;
+}
+
+.general-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .form-actions {
